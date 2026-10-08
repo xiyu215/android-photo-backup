@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>安卓相册备份 · 管理页</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">▣</span>
+    <div>
+      <div class="title">安卓手机相册局域网备份工具</div>
+      <div class="sub" id="subtitle">正在连接…</div>
+    </div>
+  </div>
+  <div class="conn"><span class="dot" id="connDot"></span><span id="connText">连接中</span></div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="progress">进度</button>
+  <button class="tab" data-tab="cleanup">清理清单</button>
+  <button class="tab" data-tab="restore">反向下载</button>
+  <button class="tab" data-tab="about">说明</button>
+</nav>
+
+<main>
+  <!-- ============ 进度 ============ -->
+  <section class="panel active" id="panel-progress">
+    <div class="card">
+      <div class="stage" id="stage">准备中</div>
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+      <div class="bar-meta">
+        <span id="percent">0%</span>
+        <span id="bytes">0 B / 0 B</span>
+        <span id="speed">0 B/s</span>
+      </div>
+      <div class="current" id="currentFile">—</div>
+    </div>
+    <div class="grid">
+      <div class="stat"><div class="k">文件总数</div><div class="v" id="stTotal">0</div></div>
+      <div class="stat"><div class="k">已完成</div><div class="v" id="stDone">0</div></div>
+      <div class="stat"><div class="k">秒传跳过</div><div class="v" id="stSkip">0</div></div>
+      <div class="stat"><div class="k">失败</div><div class="v warn" id="stFail">0</div></div>
+      <div class="stat"><div class="k">已用时</div><div class="v" id="stElapsed">—</div></div>
+      <div class="stat"><div class="k">预计剩余</div><div class="v" id="stEta">—</div></div>
+    </div>
+    <div class="card hint" id="progressHint">
+      备份进行中。手机上的文件<b>不会被删除</b>，本工具只读取。
+    </div>
+  </section>
+
+  <!-- ============ 清理清单 ============ -->
+  <section class="panel" id="panel-cleanup">
+    <div class="tierbar" id="tierbar"></div>
+    <div class="toolbar">
+      <input id="search" placeholder="搜索文件名 / 路径 / 来源…">
+      <button class="btn" id="btnCsv">导出 CSV</button>
+      <button class="btn" id="btnTxt">导出 TXT</button>
+    </div>
+    <div class="card tablewrap">
+      <table id="cleanupTable">
+        <thead>
+          <tr><th class="c-sel"><input type="checkbox" id="selAll"></th>
+              <th>文件名</th><th class="c-num">大小</th><th>时间</th>
+              <th class="c-hide">来源</th><th>手机路径</th><th class="c-hide">备注</th></tr>
+        </thead>
+        <tbody id="cleanupBody"><tr><td colspan="7" class="empty">暂无数据</td></tr></tbody>
+      </table>
+    </div>
+    <div class="toolbar">
+      <button class="btn primary" id="btnRestore">把选中文件放回手机</button>
+      <button class="btn" id="btnZip">打包 ZIP 下载</button>
+      <span class="selinfo" id="selInfo">已选 0 个</span>
+    </div>
+    <div class="card warnbox">
+      <b>重要：</b>本页只是建议清单，<b>工具不会删除你手机上的任何文件</b>。
+      删除动作请你自己在手机相册/文件管理器里对照路径手动完成。
+      需要批量执行时，可在电脑上打开报告目录里的
+      <code>删除脚本_日期_请确认后再运行.bat</code>（需你手动双击并二次确认）。
+    </div>
+  </section>
+
+  <!-- ============ 反向下载 ============ -->
+  <section class="panel" id="panel-restore">
+    <div class="card">
+      <p>把电脑上已备份的照片放回手机。目标目录：<code id="restoreDir">/sdcard/DCIM/Restored</code></p>
+      <p class="muted">只写入这个目录，<b>不会覆盖手机上已有的任何文件</b>；同名文件会自动追加后缀。</p>
+    </div>
+    <div class="toolbar">
+      <button class="btn primary" id="btnPush">推送到手机</button>
+      <button class="btn" id="btnRefresh">刷新媒体库</button>
+    </div>
+    <div class="card log" id="restoreLog">等待操作…</div>
+  </section>
+
+  <!-- ============ 说明 ============ -->
+  <section class="panel" id="panel-about">
+    <div class="card">
+      <h3>这个工具做了什么</h3>
+      <ul>
+        <li>从安卓手机<b>只读</b>拉取照片与视频，按<b>原始字节</b>保存（不转码、不改 EXIF、不重压缩）。</li>
+        <li>每个文件都做<b>双端 SHA-256 校验</b>，只有校验通过才会被标记为「可放心删」。</li>
+        <li>同时生成两棵目录树：按拍摄时间的归档树、按手机原始路径的镜像树（用硬链接共享同一份数据）。</li>
+      </ul>
+      <h3>这个工具绝不做什么</h3>
+      <ul>
+        <li><b>绝不删除手机上的任何文件</b>——删除永远由你手动完成。</li>
+        <li>绝不修改手机上的任何内容（唯一例外：你主动使用"反向下载"时写入 <code>DCIM/Restored/</code>）。</li>
+        <li>不联网、不上传任何数据、不调用任何 AI 服务。</li>
+      </ul>
+      <h3>关于"时间存疑"</h3>
+      <p class="muted">安卓上文件的"修改时间"会被转存、下载、系统迁移改写（微信转存的图片时间全是转存当天）。
+      因此本工具按 <b>EXIF → 视频容器 → 文件名时间串 → 修改时间</b> 的顺序判断拍摄时间，
+      只有前三种都取不到时才用修改时间，并把它归入「_时间存疑」目录、默认不建议删除。</p>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span id="footInfo">—</span>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
