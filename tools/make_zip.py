@@ -2,12 +2,23 @@
 
 产出
 ----
-    dist/安卓相册备份_v{版本}_免安装版.zip
+    dist/android-photo-backup_v{版本}_portable.zip
         解压即用。里面是 exe + _internal/ + 配置.txt + 使用说明.txt。
         目标电脑上不需要装 Python、不需要装 ADB、不需要管理员权限。
 
-    dist/安卓相册备份_v{版本}_源码版.zip
+    dist/android-photo-backup_v{版本}_source.zip
         完整的源代码工程，含测试与打包脚本。
+
+关于文件名为什么是英文
+----------------------
+zip 是「外层的交付壳」，它的文件名会出现在下载链接里；而 zip **里面**的
+文件夹和程序名仍然是中文（``安卓相册备份\\``），不影响使用。
+
+之所以外层坚持用 ASCII，是因为 GitHub 的 Release 附件名会自动剥掉非 ASCII
+字符：``安卓相册备份_v1.0.0_源码版.zip`` 会被存成 ``_v1.0.0_.zip``。
+更要命的是两个包去掉中文后会**重名**（都变成 ``_v1.0.0_.zip``），
+第二个上传直接冲突。统一成英文名可以让
+「本地产物 / 仓库 dist/ / Release 附件」三处保持一致。
 
 一个实现细节
 ------------
@@ -35,6 +46,7 @@ from photobak import __version__  # noqa: E402
 DIST = ROOT / "dist"
 BUILT = DIST / "PhotoBak"                     # PyInstaller onedir 的输出目录
 APP_NAME = "安卓相册备份"
+ZIP_BASE = "android-photo-backup"   # 交付 zip 的 ASCII 文件名前缀（原因见模块开头说明）
 EXE_INTERNAL = "PhotoBak.exe"
 EXE_FINAL = f"{APP_NAME}.exe"
 
@@ -50,12 +62,14 @@ SOURCE_INCLUDE = [
     "docs",
     "配置.txt",
     "使用说明.txt",
+    "使用说明.md",
     "requirements.txt",
     "安装依赖.bat",
     "启动.bat",
     "build.bat",
     "photobak.spec",
     "README.md",
+    "LICENSE",
 ]
 
 SOURCE_EXCLUDE_DIRS = {"__pycache__", "build", "dist", ".photobak", ".git", ".venv", "venv"}
@@ -154,7 +168,7 @@ def build_exe_zip() -> Path | None:
         print("             请先运行 build.bat（或 pyinstaller photobak.spec）。")
         return None
 
-    out = DIST / f"{APP_NAME}_v{__version__}_免安装版.zip"
+    out = DIST / f"{ZIP_BASE}_v{__version__}_portable.zip"
     if out.exists():
         out.unlink()
 
@@ -189,7 +203,7 @@ def build_exe_zip() -> Path | None:
 
 def build_source_zip() -> Path:
     print("[2/2] 生成「源码版」zip ...")
-    out = DIST / f"{APP_NAME}_v{__version__}_源码版.zip"
+    out = DIST / f"{ZIP_BASE}_v{__version__}_source.zip"
     if out.exists():
         out.unlink()
 

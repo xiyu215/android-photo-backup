@@ -78,7 +78,7 @@
 
 ### 普通用户（推荐）
 
-下载 `dist/安卓相册备份_v1.0.0_免安装版.zip`，解压后双击 `安卓相册备份.exe`。
+下载 `dist/android-photo-backup_v1.0.0_portable.zip`（免安装版），解压后双击 `安卓相册备份.exe`。
 
 **什么都不用装** —— Python、ADB 全打包在里面了，也不需要管理员权限。
 
@@ -364,5 +364,8 @@ SmartScreen 对未签名程序的默认拦截。点「更多信息」→「仍�
 
 ## 许可与第三方组件
 
+本项目以 **MIT License** 授权，全文见 [`LICENSE`](LICENSE)。
+你可以自由使用、修改、分发，包括商用。
+
 `adb/` 目录下是 Google 的 **Android Platform Tools**（Apache License 2.0），
-许可证全文见 [`adb/NOTICE.txt`](adb/NOTICE.txt)。
+不适用 MIT 许可，请遵循其自身条款。许可证全文见 [`adb/NOTICE.txt`](adb/NOTICE.txt)。

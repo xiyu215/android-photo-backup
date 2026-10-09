@@ -64,6 +64,26 @@ def safe_rmtree(p: Path) -> bool:
         return False
 
 
+def count_tests() -> int | None:
+    """数一下 tests/ 目录里有多少个测试用例。
+
+    为什么不直接在文案里写死数字？
+        写死的话，每加一个测试都得记得回来改这一行 —— 迟早会忘，
+        然后屏幕上显示的数目和实际不符，反而误导人。
+        这里用 unittest 的发现机制实时统计，数字永远不会过期。
+        统计失败时返回 None，由调用方降级成不带数字的文案。
+    """
+    import unittest
+
+    try:
+        suite = unittest.defaultTestLoader.discover(
+            str(ROOT / "tests"), top_level_dir=str(ROOT)
+        )
+        return suite.countTestCases()
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="一键打包")
     ap.add_argument("--skip-tests", action="store_true", help="跳过自动化测试")
@@ -107,7 +127,9 @@ def main() -> int:
         rule("第 3 步 / 共 6 步：自动化测试（已跳过）")
     else:
         rule("第 3 步 / 共 6 步：运行自动化测试")
-        print("  48 项，约 30 秒。测试不通过就打包，等于把风险发给用户。")
+        n = count_tests()
+        prefix = f"共 {n} 项，约 30 秒。" if n else "约 30 秒。"
+        print(f"  {prefix}测试不通过就打包，等于把风险发给用户。")
         print()
         rc = run([PY, str(ROOT / "tests" / "run_all.py")])
         if rc != 0:
